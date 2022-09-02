@@ -5,20 +5,22 @@ services:
     container_name: traefik
     image: "traefik:latest"
     command:
+      - --api.insecure=true
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
       - --providers.docker
       - --log.level=ERROR
       - --certificatesresolvers.leresolver.acme.httpchallenge=true
       - --certificatesresolvers.leresolver.acme.email=abhishekism0010@gmail.com 
-      - --certificatesresolvers.leresolver.acme.storage=./acme.json
+      - --certificatesresolvers.leresolver.acme.storage=/ssl_certs/acme.json
       - --certificatesresolvers.leresolver.acme.httpchallenge.entrypoint=web
     ports:
       - "80:80"
+      - "8080:8080"
       - "443:443"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./acme.json:/acme.json"
+      - "traefik_ssl_certs:/ssl_certs"
     networks:
        - reverse_proxy_nw
     labels:
@@ -56,6 +58,8 @@ services:
 volumes:
   portainer_data:
     name: portainer_data
+  traefik_ssl_certs:
+    name: traefik_ssl_certs
 networks:
   reverse_proxy_nw:
     name: reverse_proxy_nw
