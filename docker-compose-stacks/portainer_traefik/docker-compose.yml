@@ -5,18 +5,18 @@ services:
     container_name: traefik
     image: "traefik:latest"
     command:
-      - --api.insecure=true
+      - --api.dashboard=true
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
       - --providers.docker
       - --log.level=ERROR
       - --certificatesresolvers.leresolver.acme.httpchallenge=true
+      - --certificatesresolvers.leresolver.acme.tlschallenge=true
       - --certificatesresolvers.leresolver.acme.email=abhishekism0010@gmail.com 
       - --certificatesresolvers.leresolver.acme.storage=/ssl_certs/acme.json
       - --certificatesresolvers.leresolver.acme.httpchallenge.entrypoint=web
     ports:
       - "80:80"
-      - "8080:8080"
       - "443:443"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -28,7 +28,12 @@ services:
       - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-
+      # for dashboard
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.abhishek0010.xyz`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
+      - "traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=leresolver"
   portainer:
     container_name: portainer
     image: portainer/portainer-ce:latest
