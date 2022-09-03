@@ -11,16 +11,19 @@ services:
       - --entrypoints.websecure.address=:443
       - --providers.docker
       - --log.level=ERROR
-      - --certificatesresolvers.leresolver.acme.tlschallenge=true
-      # Comment below config for actual ssl certs
-      - --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
-
-      - --certificatesresolvers.leresolver.acme.email=abhishekism0010@icloud.com 
+      - --certificatesresolvers.leresolver.acme.email=abhishekism0010@gmail.com 
       - --certificatesresolvers.leresolver.acme.storage=/ssl_certs/acme.json
-      - --certificatesresolvers.leresolver.acme.httpchallenge.entrypoint=web
+      # Comment below config for actual ssl certs
+      #- --certificatesresolvers.leresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.leresolver.acme.dnschallenge=true
+      - --certificatesresolvers.leresolver.acme.dnschallenge.provider=godaddy
+      - --certificatesresolvers.leresolver.acme.dnschallenge.resolvers=ns05.domaincontrol.com:53,ns06.domaincontrol.com:53
+      - --certificatesresolvers.leresolver.acme.dnschallenge.delaybeforecheck=90 
     ports:
       - "80:80"
       - "443:443"
+    env_file:
+      - .env
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "traefik_ssl_certs:/ssl_certs"
@@ -29,14 +32,20 @@ services:
     labels:
       - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
       - "traefik.http.routers.http-catchall.entrypoints=web"
-      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
+
+      # wildcard certs
+      - "traefik.http.routers.wildcard-certs.tls.certresolver=leresolver"
+      - "traefik.http.routers.wildcard-certs.tls.domains[0].main=abhishek0010.xyz"
+      - "traefik.http.routers.wildcard-certs.tls.domains[0].sans=*.abhishek0010.xyz"
+ 
       # for dashboard
-      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.abhishek0010.xyz`)"
-      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
-      - "traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080"
-      - "traefik.http.routers.traefik-dashboard.service=api@internal"
-      - "traefik.http.routers.traefik-dashboard.tls.certresolver=leresolver"
+      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.abhishek0010.xyz`)"
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.entrypoints=websecure"
+      - "traefik.http.services.traefik-secure.loadbalancer.server.port=8080"
+      - "traefik.http.routers.traefik-secure.service=api@internal"
   portainer:
     container_name: portainer
     image: portainer/portainer-ce:latest
@@ -52,16 +61,16 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`portainer.abhishek0010.xyz`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls=true"
       - "traefik.http.services.frontend.loadbalancer.server.port=9000"
       - "traefik.http.routers.frontend.service=frontend"
-      - "traefik.http.routers.frontend.tls.certresolver=leresolver"
 
       # Edge
       - "traefik.http.routers.edge.rule=Host(`edge.abhishek0010.xyz`)"
       - "traefik.http.routers.edge.entrypoints=websecure"
+      - "traefik.http.routers.edge.tls=true"
       - "traefik.http.services.edge.loadbalancer.server.port=8000"
       - "traefik.http.routers.edge.service=edge"
-      - "traefik.http.routers.edge.tls.certresolver=leresolver"
     
 volumes:
   portainer_data:
