@@ -4,15 +4,18 @@ services:
   traefik:
     container_name: traefik
     image: "traefik:latest"
+    restart: unless-stopped
     command:
       - --api.dashboard=true
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
       - --providers.docker
       - --log.level=ERROR
-      - --certificatesresolvers.leresolver.acme.httpchallenge=true
       - --certificatesresolvers.leresolver.acme.tlschallenge=true
-      - --certificatesresolvers.leresolver.acme.email=abhishekism0010@gmail.com 
+      # Comment below config for actual ssl certs
+      - --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+
+      - --certificatesresolvers.leresolver.acme.email=abhishekism0010@icloud.com 
       - --certificatesresolvers.leresolver.acme.storage=/ssl_certs/acme.json
       - --certificatesresolvers.leresolver.acme.httpchallenge.entrypoint=web
     ports:
