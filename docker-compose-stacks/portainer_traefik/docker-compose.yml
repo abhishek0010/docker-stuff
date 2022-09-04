@@ -5,38 +5,27 @@ services:
     container_name: traefik
     image: "traefik:latest"
     restart: unless-stopped
-    command:
-      - --api.dashboard=true
-      - --entrypoints.web.address=:80
-      - --entrypoints.websecure.address=:443
-      - --providers.docker
-      - --log.level=INFO
-      - --certificatesresolvers.leresolver.acme.email=abhishekism0010@gmail.com 
-      - --certificatesresolvers.leresolver.acme.storage=/ssl_certs/acme.json
-      # Comment below config for actual ssl certs
-      #- --certificatesresolvers.leresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
-      - --certificatesresolvers.leresolver.acme.dnschallenge=true
-      - --certificatesresolvers.leresolver.acme.dnschallenge.provider=godaddy
-      - --certificatesresolvers.leresolver.acme.dnschallenge.resolvers=ns05.domaincontrol.com:53,ns06.domaincontrol.com:53
-      - --certificatesresolvers.leresolver.acme.dnschallenge.delaybeforecheck=90 
     ports:
       - "80:80"
       - "443:443"
     env_file:
       - .env
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "traefik_ssl_certs:/ssl_certs"
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/traefik.yml:ro
+      - traefik_ssl_certs:/ssl_certs
     networks:
        - reverse_proxy_nw
     labels:
+      - "traefik.enable=true"
       - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
       - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
 
       # wildcard certs
-      - "traefik.http.routers.wildcard-certs.tls.certresolver=leresolver"
+      - "traefik.http.routers.wildcard-certs.tls.certresolver=godaddy"
       - "traefik.http.routers.wildcard-certs.tls.domains[0].main=abhishek0010.xyz"
       - "traefik.http.routers.wildcard-certs.tls.domains[0].sans=*.abhishek0010.xyz"
  
@@ -53,25 +42,19 @@ services:
     command: -H unix:///var/run/docker.sock
     restart: always
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - portainer_data:/data
     networks:
       - reverse_proxy_nw
     labels:
       # Frontend
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`portainer.abhishek0010.xyz`)"
-      - "traefik.http.routers.frontend.entrypoints=websecure"
-      - "traefik.http.routers.frontend.tls=true"
-      - "traefik.http.services.frontend.loadbalancer.server.port=9000"
-      - "traefik.http.routers.frontend.service=frontend"
-
-      # Edge
-      - "traefik.http.routers.edge.rule=Host(`edge.abhishek0010.xyz`)"
-      - "traefik.http.routers.edge.entrypoints=websecure"
-      - "traefik.http.routers.edge.tls=true"
-      - "traefik.http.services.edge.loadbalancer.server.port=8000"
-      - "traefik.http.routers.edge.service=edge"
+      - "traefik.http.routers.portainer-secure.rule=Host(`portainer.abhishek0010.xyz`)"
+      - "traefik.http.routers.portainer-secure.entrypoints=websecure"
+      - "traefik.http.routers.portainer-secure.tls=true"
+      - "traefik.http.services.portainer-secure.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer-secure.service=portainer-secure"
       - "traefik.docker.network=reverse_proxy_nw"
 volumes:
   portainer_data:
