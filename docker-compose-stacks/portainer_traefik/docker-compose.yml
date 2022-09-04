@@ -10,7 +10,7 @@ services:
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
       - --providers.docker
-      - --log.level=ERROR
+      - --log.level=INFO
       - --certificatesresolvers.leresolver.acme.email=abhishekism0010@gmail.com 
       - --certificatesresolvers.leresolver.acme.storage=/ssl_certs/acme.json
       # Comment below config for actual ssl certs
@@ -46,6 +46,7 @@ services:
       - "traefik.http.routers.traefik-secure.entrypoints=websecure"
       - "traefik.http.services.traefik-secure.loadbalancer.server.port=8080"
       - "traefik.http.routers.traefik-secure.service=api@internal"
+      - "traefik.docker.network=reverse_proxy_nw"
   portainer:
     container_name: portainer
     image: portainer/portainer-ce:latest
@@ -71,7 +72,7 @@ services:
       - "traefik.http.routers.edge.tls=true"
       - "traefik.http.services.edge.loadbalancer.server.port=8000"
       - "traefik.http.routers.edge.service=edge"
-    
+      - "traefik.docker.network=reverse_proxy_nw"
 volumes:
   portainer_data:
     name: portainer_data
@@ -79,6 +80,6 @@ volumes:
     name: traefik_ssl_certs
 networks:
   reverse_proxy_nw:
-    name: reverse_proxy_nw
+    external: true
 
 
