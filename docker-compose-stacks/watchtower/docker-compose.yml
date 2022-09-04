@@ -1,0 +1,15 @@
+version: "3.3"
+
+services:
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower:latest
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - reverse_proxy_nw
+networks:
+  reverse_proxy_nw:
+    external: true

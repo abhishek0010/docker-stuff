@@ -1,4 +1,4 @@
-# Deploying in a Docker Standalone scenario
+# Traefik Deployment
 To deploy Portainer behind Traefik Proxy in a Docker standalone scenario you must use a Docker Compose file. In the following docker-compose.yml you will find the configuration for Portainer Traefik with SSL support and the Portainer Server.
 ```yaml
 version: "3.3"
