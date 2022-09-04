@@ -19,14 +19,19 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    env_file:
+      - .env
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "traefik_ssl_certs:/ssl_certs"
+    networks:
+       - reverse_proxy_nw
     labels:
       - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
       - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.docker.network=reverse_proxy_nw"
 
   portainer:
     image: portainer/portainer-ce:latest
@@ -35,6 +40,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
+    networks:
+       - reverse_proxy_nw
     labels:
       # Frontend
       - "traefik.enable=true"
@@ -50,6 +57,7 @@ services:
       - "traefik.http.services.edge.loadbalancer.server.port=8000"
       - "traefik.http.routers.edge.service=edge"
       - "traefik.http.routers.edge.tls.certresolver=leresolver"
+      - "traefik.docker.network=reverse_proxy_nw"
 
 
 volumes:
@@ -57,6 +65,15 @@ volumes:
     name: portainer_data
   traefik-ssl-certs:
     name: traefik_ssl_certs
+networks:
+  reverse_proxy_nw:
+    external: true
+```
+It needs an `.env` file for environment variables.
+
+It also need a docker bridge network created manually
+```shell
+$ docker network create reverse_proxy_nw
 ```
 
 I have created a volume so that certs dont get discarded
