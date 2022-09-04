@@ -1,0 +1,30 @@
+version: "2.1"
+services:
+  code-server:
+    image: lscr.io/linuxserver/code-server:latest
+    container_name: code-server
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Kolkata
+      - DEFAULT_WORKSPACE=/config/workspace #optional
+    volumes:
+      #BIND mount directory
+      - /root:/config/workspace
+    networks:
+      - reverse_proxy_nw
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.code-server.rule=Host(`code.abhishek0010.xyz`)
+      - traefik.http.middlewares.code-server-auth.basicauth.users=abhishek0010:$$2y$$05$$H9A6Btmj7ZcTCKorWEeJner1NPVc/2b56wmpHB/cPhYWNkgiyQaCG
+      - traefik.http.routers.code-server.tls=true
+      - traefik.http.routers.code-server.entrypoints=websecure
+      - traefik.http.routers.code-server.middlewares=code-server-auth
+      - traefik.http.services.code-server.loadbalancer.server.port=8443
+      - traefik.http.routers.code-server.service=code-server
+      - traefik.docker.network=reverse_proxy_nw
+
+networks:
+  reverse_proxy_nw:
+    external: true
