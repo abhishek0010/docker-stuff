@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3"
 
 services:
   traefik:
@@ -15,25 +15,25 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik.yml:/traefik.yml:ro
       - traefik_ssl_certs:/ssl_certs
+      - ./config.yml:/config.yml:ro
     networks:
        - reverse_proxy_nw
     labels:
       - "traefik.enable=true"
+      
       - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
       - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=abhishek0010:$$apr1$$EacK/H5y$$GcQXPVRUsR4REk0Fr8dYY/"
 
-      # wildcard certs
-      - "traefik.http.routers.wildcard-certs.tls.certresolver=godaddy"
-      - "traefik.http.routers.wildcard-certs.tls.domains[0].main=abhishek0010.xyz"
-      - "traefik.http.routers.wildcard-certs.tls.domains[0].sans=*.abhishek0010.xyz"
- 
-      # for dashboard
       - "traefik.http.routers.traefik-secure.rule=Host(`traefik.abhishek0010.xyz`)"
+      - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
       - "traefik.http.routers.traefik-secure.tls=true"
       - "traefik.http.routers.traefik-secure.entrypoints=websecure"
-      - "traefik.http.services.traefik-secure.loadbalancer.server.port=8080"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=godaddy"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main=abhishek0010.xyz"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.abhishek0010.xyz"
       - "traefik.http.routers.traefik-secure.service=api@internal"
       - "traefik.docker.network=reverse_proxy_nw"
 volumes:
