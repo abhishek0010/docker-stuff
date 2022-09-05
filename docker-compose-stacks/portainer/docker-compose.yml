@@ -19,7 +19,6 @@ services:
       - "traefik.http.routers.portainer-secure.entrypoints=websecure"
       - "traefik.http.routers.portainer-secure.tls=true"
       - "traefik.http.services.portainer-secure.loadbalancer.server.port=9000"
-      - "traefik.http.routers.portainer-secure.service=portainer-secure"
       - "traefik.docker.network=reverse_proxy_nw"
 volumes:
   portainer_data:

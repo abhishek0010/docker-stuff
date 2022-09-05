@@ -22,7 +22,6 @@ services:
       - traefik.http.routers.code-server.entrypoints=websecure
       - traefik.http.routers.code-server.middlewares=code-server-auth
       - traefik.http.services.code-server.loadbalancer.server.port=8443
-      - traefik.http.routers.code-server.service=code-server
       - traefik.docker.network=reverse_proxy_nw
 
 networks:
