@@ -1,9 +1,9 @@
-version: "3"
+version: "3.7"
 
 services:
   traefik:
     container_name: traefik
-    image: "traefik:latest"
+    image: traefik:latest
     restart: unless-stopped
     ports:
       - "80:80"
@@ -20,13 +20,12 @@ services:
        - reverse_proxy_nw
     labels:
       - "traefik.enable=true"
-      
-      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)"
       - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
       - "traefik.http.middlewares.traefik-auth.basicauth.users=abhishek0010:$$apr1$$EacK/H5y$$GcQXPVRUsR4REk0Fr8dYY/"
-
       - "traefik.http.routers.traefik-secure.rule=Host(`traefik.abhishek0010.xyz`)"
       - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
       - "traefik.http.routers.traefik-secure.tls=true"
