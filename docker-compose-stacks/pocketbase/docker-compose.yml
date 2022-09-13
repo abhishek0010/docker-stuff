@@ -1,0 +1,27 @@
+version: "3"
+services:
+  pocketbase:
+    container_name: pocketbase
+    build: .
+    restart: unless-stopped
+    networks:
+      - reverse_proxy_nw
+      - backend_nw
+    volumes:
+      - pocketbase_volume:/pb_data
+    ports:
+      - 8090:8090
+        #labels:
+        # - "traefik.enable=true"
+        # - "traefik.http.routers.pocketbase-secure.rule=Host(`dev.abhishek0010.xyz`)"
+        # - "traefik.http.routers.pocketbase-secure.entrypoints=websecure"
+        # - "traefik.http.routers.pocketbase-secure.tls=true"
+        # - "traefik.http.services.pocketbase-secure.loadbalancer.server.port=8090"
+        # - "treafik.docker.network=reverse_proxy_nw"
+networks:
+  reverse_proxy_nw:
+    external: true
+  backend_nw:
+volumes:
+  pocketbase_volume:
+    name: pocketbase_volume
