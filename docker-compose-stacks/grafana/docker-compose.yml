@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  grafana:
+    container_name: grafana
+    image: grafana/grafana-oss:latest
+    networks:
+      - reverse_proxy_nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana-secure.rule=Host(`logs.abhishek0010.xyz`)"
+      - "traefik.http.routers.grafana-secure.entrypoints=websecure"
+      - "traefik.http.routers.grafana-secure.tls=true"
+      - "traefik.http.services.grafana-secure.loadbalancer.server.port=3000"
+      - "treafik.docker.network=reverse_proxy_nw"
+networks:
+  reverse_proxy_nw:
+    external: true
