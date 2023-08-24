@@ -1,0 +1,35 @@
+api:
+  dashboard: true
+  debug: true
+log:
+  level: DEBUG
+accessLog:
+  filePath: "/var/log/traefik/access.log"
+entryPoints:
+  http:
+    address: ":80"
+  https:
+    address: ":443"
+serversTransport:
+  insecureSkipVerify: true
+providers:
+  docker:
+    network: traefik-public
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    swarmMode: true
+    #file:
+    #filename: /dynamic.yml
+certificatesResolvers:
+  godaddy:
+    acme:
+      #caServer: https://acme-v02.api.letsencrypt.org/directory
+    email: <YOUR EMAIL>
+      storage: /le/acme.json
+      dnsChallenge:
+        provider: <YOUR DNS PROVIDER>
+        delayBeforeCheck: 60
+        disablePropagationCheck: true
+        resolvers:
+          - "ns65.domaincontrol.com:53"
+          - "ns66.domaincontrol.com:53"
