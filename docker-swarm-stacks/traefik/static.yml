@@ -1,13 +1,21 @@
+ping: {}
 api:
   dashboard: true
   debug: true
 log:
   level: DEBUG
+  format: json
 accessLog:
   filePath: "/var/log/traefik/access.log"
+  format: json
 entryPoints:
   http:
-    address: ":80"
+    address: :80
+    http:
+      redirections:
+        entryPoint:
+          to: https
+          scheme: https
   https:
     address: ":443"
 serversTransport:
@@ -24,12 +32,10 @@ certificatesResolvers:
   godaddy:
     acme:
       #caServer: https://acme-v02.api.letsencrypt.org/directory
-    email: <YOUR EMAIL>
+      email: <YOUR EMAIL>
       storage: /le/acme.json
       dnsChallenge:
         provider: <YOUR DNS PROVIDER>
-        delayBeforeCheck: 60
-        disablePropagationCheck: true
         resolvers:
           - "ns65.domaincontrol.com:53"
           - "ns66.domaincontrol.com:53"
