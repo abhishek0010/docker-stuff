@@ -1,0 +1,23 @@
+version: "3.8"
+services:
+  serge:
+    image: ghcr.io/serge-chat/serge:latest
+    container_name: serge
+    restart: unless-stopped
+    volumes:
+      - models:/usr/src/app/weights
+      - datadb:/data/db/
+    networks:
+      - reverse_proxy_nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.serge.rule=Host(`serge.abhishek0010.in`)"
+      - "traefik.http.routers.serge.tls=true"
+      - "traefik.http.routers.serge.middlewares=authelia@docker"
+      - "traefik.http.services.serge.loadbalancer.server.port=8008"
+volumes:
+  datadb:
+  models:
+networks:
+  reverse_proxy_nw:
+    external: true
