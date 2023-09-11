@@ -14,32 +14,51 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik.yml:/traefik.yml:ro
-      - traefik_ssl_certs:/ssl_certs
-      - ./config.yml:/config.yml:ro
+      - ./acme.json:/le/acme.json
+      - ./logs/:/var/log/
     networks:
-       - reverse_proxy_nw
+      - reverse_proxy_nw
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)"
-      - "traefik.http.routers.http-catchall.entrypoints=web"
-      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
-      - "traefik.http.middlewares.traefik-auth.basicauth.users=abhishek0010:$$apr1$$EacK/H5y$$GcQXPVRUsR4REk0Fr8dYY/"
-      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.abhishek0010.xyz`)"
-      - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
+      #- "traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)"
+      #- "traefik.http.routers.http-catchall.entrypoints=web"
+      #- "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
+      #- "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      #- "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+      #- "traefik.http.middlewares.traefik-auth.basicauth.users=<user-mane>:<generated-password-hash>"
+      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.abhishek0010.in`)"
+      #- "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
       - "traefik.http.routers.traefik-secure.tls=true"
-      - "traefik.http.routers.traefik-secure.entrypoints=websecure"
+      #- "traefik.http.routers.traefik-secure.entrypoints=websecure"
       - "traefik.http.routers.traefik-secure.tls.certresolver=godaddy"
       - "traefik.http.routers.traefik-secure.tls.domains[0].main=abhishek0010.xyz"
       - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.abhishek0010.xyz"
       - "traefik.http.routers.traefik-secure.service=api@internal"
-      - "traefik.docker.network=reverse_proxy_nw"
-volumes:
-  traefik_ssl_certs:
-    name: traefik_ssl_certs
+      #- "traefik.docker.network=reverse_proxy_nw"
+      - "traefik.http.routers.traefik-secure.middlewares=authelia@docker"
+      - "traefik.http.services.traefik-secure.loadbalancer.server.port=8080"
+  whoami:
+    container_name: whoami
+    image: traefik/whoami
+    networks:
+      - reverse_proxy_nw
+    command:
+      - --port=8082 # Our service listens on 8082
+      - --name=abhishek
+    labels:
+      - "traefik.enable=true"
+      #- "traefik.http.routers.my-app.entrypoints=http"
+      #- "traefik.http.routers.my-app.rule=Host(`whoami.abhishek0010.in`)"
+      #- "treafik.http.middlewares.my-app-https-redirect.redirectscheme.scheme=https"
+      #- "traefik.http.routers.my-app.middlewares=my-app-https-redirect"
+      - "traefik.http.services.my-app-secure.loadbalancer.server.port=8082"
+      - "traefik.http.routers.my-app-secure.middlewares=authelia@docker"
+      - "traefik.http.routers.my-app-secure.rule=Host(`whoami.abhishek0010.in`)"
+      #- "traefik.http.routers.my-app-secure.entrypoints=https"
+      - "traefik.http.routers.my-app-secure.tls=true"
+      #- "traefik.http.routers.my-app-secure.service=my-app"
+      #- "traefik.docker.network=traefik-public"
+
 networks:
   reverse_proxy_nw:
     external: true
-
-
