@@ -1,0 +1,102 @@
+---
+### ############################################################
+#                   Authelia configuration                    #
+###############################################################
+
+theme: dark
+# This secret can also be set using the env variables AUTHELIA_JWT_SECRET_FILE
+jwt_secret: <GENERATE_OWN_SECRET>
+default_redirection_url: https://auth.domain.com
+
+server:
+  host: 0.0.0.0
+  port: 9091
+
+log:
+  level: debug
+
+totp:
+  issuer: auth.domain.com
+
+# duo_api:
+#  hostname: api-123456789.example.com
+#  integration_key: ABCDEF
+#  # This secret can also be set using the env variables AUTHELIA_DUO_API_SECRET_KEY_FILE
+#  secret_key: 1234567890abcdefghifjkl
+
+authentication_backend:
+  file:
+    path: /config/users_database.yml
+    password:
+      algorithm: argon2id
+      iterations: 1
+      salt_length: 16
+      parallelism: 8
+      memory: 64
+
+access_control:
+  default_policy: deny
+  rules:
+    # Rules applied to everyone
+    - domain: 'whoami.abhishek0010.in'
+      policy: bypass
+    - domain: 'traefik.abhishek0010.in'
+      policy: one_factor
+    - domain: 'portainer.abhishek0010.in'
+      policy: bypass
+    - domain: 'serge.abhishek0010.in'
+      policy: one_factor
+
+session:
+  # This secret can also be set using the env variables AUTHELIA_SESSION_SECRET_FILE
+  secret: <GENERATE_OWN _SECRET>
+  name: authelia_session
+  domain: abhishek0010.in  # Should match whatever your root protected domain is
+  expiration: 3600  # 1 hour
+  inactivity: 300  # 5 minutes
+  remember_me_duration: 1M
+
+  #redis:
+  # host: redis
+  # port: 6379
+    # This secret can also be set using the env variables AUTHELIA_SESSION_REDIS_PASSWORD_FILE
+    # password: authelia
+regulation:
+  max_retries: 3
+  find_time: 120
+  ban_time: 300
+
+storage:
+  encryption_key: <GENERATE_OWN _ENCRYPTION_KEY>
+  local:
+    path: /config/db.sqlite3
+
+notifier:
+        #smtp:
+        #username: test
+    # This secret can also be set using the env variables AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE
+    #password: password
+    #host: mail.example.com
+    #port: 25
+    #sender: admin@example.com
+  filesystem:
+     filename: /config/notification.txt
+identity_providers:
+  oidc: 
+    hmac_secret: <GENERATE_OWN_SECRET>
+    issuer_private_key: <GENERATE_OWN_PUBLIC_PRIVATE_PAIR>
+    clients: #ADD CLIENTS HERE WHO SUPPORTS OAUTH
+      - id: portainer
+        description: Portainer
+        secret: <GENERATE_OWN_SECRET>
+        public: false
+        authorization_policy: two_factor
+        redirect_uris:
+          - https://portainer.abhishek0010.in
+        scopes:
+          - openid
+          - profile
+          - groups
+          - email
+        userinfo_signing_algorithm: none
+...

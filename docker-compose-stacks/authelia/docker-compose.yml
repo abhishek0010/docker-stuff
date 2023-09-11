@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  authelia:
+    container_name: authelia
+    image: authelia/authelia
+    volumes:
+      - ./config:/config
+    environment:
+      - TZ=Asia/Kolkata
+    networks:
+      - reverse_proxy_nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.authelia.rule=Host(`auth.abhishek0010.in`)"
+        #- "traefik.http.routers.authelia.entrypoints=websecure"
+      - "traefik.http.routers.authelia.tls=true"
+      - "traefik.http.services.authelia.loadbalancer.server.port=9091"
+      - "traefik.http.middlewares.authelia.forwardauth.address=http://authelia:9091/api/verify?rd=https://auth.abhishek0010.in/"
+      - "traefik.http.middlewares.authelia.forwardauth.trustForwardHeader=true"
+      - "traefik.http.middlewares.authelia.forwardauth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email"
+        #- "traefik.docker.network=traefik-public"
+networks:
+  reverse_proxy_nw:
+    external: true
