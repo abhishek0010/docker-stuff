@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   traefik:
-    image: "traefik:latest"
+    image: "traefik:2.10"
     ports:
       - "80:80"
       - "443:443"
@@ -10,37 +10,37 @@ services:
       - traefik-public
     env_file:
       - .env
+    healthcheck:
+      test: ['CMD', 'traefik', 'healthcheck', '--ping']
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       # Make sure the volume folder is created
       - "/mnt/data/traefik/static.yml:/traefik.yml:ro"
-      - "/mnt/data/traefik/dynamic.yml:/dynamic.yml:ro"
+      #- "/mnt/data/traefik/dynamic.yml:/dynamic.yml:ro"
       - "/mnt/data/traefik/acme.json:/le/acme.json"
       - "./logs/traefik:/var/log/traefik"
     deploy:
+      placement:
+        constraints: [node.labels.label == manager]
       labels:
-        # Dashboard
         - "traefik.enable=true"
-        # Change the host url here
-        - "traefik.http.routers.traefik.rule=Host(`traefik.your.domain`)"
-        - "traefik.http.routers.traefik.service=api@internal"
-        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-        - "traefik.http.routers.traefik.tls=true"
-        - "traefik.http.routers.traefik.entrypoints=https"
-        - "traefik.http.routers.traefik.tls.certresolver=godaddy"
-        - "traefik.http.routers.traefik.tls.domains[0].main=your.domain"
-        - "traefik.http.routers.traefik.tls.domains[0].sans=*.your.domain"
-        - "traefik.http.routers.traefik.middlewares=traefik-auth"
-        # Change the auth password here
-        - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
-        - "traefik.http.middlewares.traefik-auth.basicauth.users=admin:<GENERATED PWD>" # user/password
-        # global redirect to https
-        - "traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)"
-        - "traefik.http.routers.http-catchall.entrypoints=http"
-        - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
-        # middleware redirect
-        - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+        #- "traefik.http.routers.traefik.entrypoints=http"
+        #- "traefik.http.routers.traefik.rule=Host(`traefik.abhishek0010.in`)"
+        #- "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
+        #- "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+        #- "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
+        - "traefik.http.routers.traefik-secure.rule=Host(`traefik.abhishek0010.in`)"
+        #- "traefik.http.routers.traefik.service=api@internal"
+        - "traefik.http.routers.traefik-secure.service=api@internal"
+        - "traefik.http.services.traefik-secure.loadbalancer.server.port=8080"
+        #- "traefik.http.services.traefik.loadbalancer.server.scheme=https"
+        - "traefik.http.routers.traefik-secure.tls=true"
+        #- "traefik.http.routers.traefik-secure.entrypoints=https"
+        - "traefik.http.routers.traefik-secure.tls.certresolver=godaddy"
+        - "traefik.http.routers.traefik-secure.tls.domains[0].main=abhishek0010.in"
+        - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.abhishek0010.in"
+        - "traefik.http.routers.traefik-secure.middlewares=authelia@docker"
 
   my-app:
     image: containous/whoami:v1.3.0
@@ -51,14 +51,17 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        # Change the host url here
-        - "traefik.http.routers.my-app.rule=Host(`whoami.your.domain`)"
-        - "traefik.http.services.my-app.loadbalancer.server.port=8082"
-        - "traefik.http.routers.my-app.middlewares=auth"
-        - "traefik.http.routers.my-app.entrypoints=https"
-        - "traefik.http.routers.my-app.tls=true"
-        # Change the password here
-        - "traefik.http.middlewares.auth.basicauth.users=admin:<GENERATED PASSWORD>" # user/password
+        #- "traefik.http.routers.my-app.entrypoints=http"
+        #- "traefik.http.routers.my-app.rule=Host(`whoami.abhishek0010.in`)"
+        #- "treafik.http.middlewares.my-app-https-redirect.redirectscheme.scheme=https"
+        #- "traefik.http.routers.my-app.middlewares=my-app-https-redirect"
+        - "traefik.http.services.my-app-secure.loadbalancer.server.port=8082"
+        - "traefik.http.routers.my-app-secure.middlewares=authelia@docker"
+        - "traefik.http.routers.my-app-secure.rule=Host(`whoami.abhishek0010.in`)"
+        #- "traefik.http.routers.my-app-secure.entrypoints=https"
+        - "traefik.http.routers.my-app-secure.tls=true"
+        #- "traefik.http.routers.my-app-secure.service=my-app"
+        #- "traefik.docker.network=traefik-public"
 
 networks:
   traefik-public:
