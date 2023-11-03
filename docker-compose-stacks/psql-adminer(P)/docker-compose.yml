@@ -1,0 +1,30 @@
+version: "3"
+services:
+  psql:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: sample_db
+    networks:
+      - psql-adminer
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    depends_on:
+      - psql
+    networks:
+      - psql-adminer
+      - reverse_proxy_nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.adminer.rule=Host(`adminer.domain.in`)"
+      - "traefik.http.routers.adminer.tls=true"
+      #- "traefik.http.routers.serge.middlewares=authelia@docker"
+      - "traefik.http.services.adminer.loadbalancer.server.port=8080"
+networks:
+  psql-adminer:
+  reverse_proxy_nw:
+    external: true
