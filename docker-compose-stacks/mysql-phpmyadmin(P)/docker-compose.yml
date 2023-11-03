@@ -1,0 +1,45 @@
+version: "3"
+
+services:
+  # Database
+  db:
+    image: mysql:latest
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_USERNAME: root
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: sample_db
+    networks:
+      - mysql-phpmyadmin
+  # phpmyadmin
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin:latest
+    restart: unless-stopped
+    environment:
+      - PMA_ARBITRARY:1
+      - PMA_HOST:mysql
+      - MYSQL_USERNAME:root
+      - MYSQL_ROOT_PASSWORD:password
+    networks:
+      - mysql-phpmyadmin
+      - reverse_proxy_nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.phpmyadmin.rule=Host(`phpmyadmin.domain.in`)"
+      - "traefik.http.routers.phpmyadmin.tls=true"
+      #- "traefik.http.routers.serge.middlewares=authelia@docker"
+      #- "traefik.http.services.phpmyadmin.loadbalancer.server.port=8080"
+
+networks:
+  mysql-phpmyadmin:
+  reverse_proxy_nw:
+    external: true
+
+volumes:
+  db_data:
