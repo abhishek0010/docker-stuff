@@ -11,7 +11,7 @@ users:
     disabled: false
     displayname: "Abhishek Kumar"
     password: <GENERATE_HASH> 
-    email: abhishekism0010@gmail.com
+    email: email@gmail.com
     groups:
       - admins
       - user

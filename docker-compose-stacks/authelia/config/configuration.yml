@@ -38,20 +38,20 @@ access_control:
   default_policy: deny
   rules:
     # Rules applied to everyone
-    - domain: 'whoami.abhishek0010.in'
+    - domain: 'whoami.domain.in'
       policy: bypass
-    - domain: 'traefik.abhishek0010.in'
+    - domain: 'traefik.domain.in'
       policy: one_factor
-    - domain: 'portainer.abhishek0010.in'
+    - domain: 'portainer.domain.in'
       policy: bypass
-    - domain: 'serge.abhishek0010.in'
+    - domain: 'serge.domain.in'
       policy: one_factor
 
 session:
   # This secret can also be set using the env variables AUTHELIA_SESSION_SECRET_FILE
   secret: <GENERATE_OWN _SECRET>
   name: authelia_session
-  domain: abhishek0010.in  # Should match whatever your root protected domain is
+  domain: domain.in  # Should match whatever your root protected domain is
   expiration: 3600  # 1 hour
   inactivity: 300  # 5 minutes
   remember_me_duration: 1M

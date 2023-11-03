@@ -5,6 +5,7 @@ services:
     image: authelia/authelia
     volumes:
       - ./config:/config
+    restart: unless-stopped
     environment:
       - TZ=Asia/Kolkata
     networks:
