@@ -18,6 +18,8 @@ entryPoints:
           scheme: https
   https:
     address: :443
+  video:
+    address: ":10000/udp"
 serversTransport:
   insecureSkipVerify: true
 providers:
