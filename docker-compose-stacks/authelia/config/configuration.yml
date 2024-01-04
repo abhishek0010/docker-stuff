@@ -46,7 +46,12 @@ access_control:
       policy: bypass
     - domain: 'serge.domain.in'
       policy: one_factor
-
+    - domain: 'cyberchef.domain.in'
+      policy: two_factor
+    - domain: 'meet.domain.in'
+      policy: bypass
+    - domain: 'invoice.domain.in'
+      policy: bypass
 session:
   # This secret can also be set using the env variables AUTHELIA_SESSION_SECRET_FILE
   secret: <GENERATE_OWN _SECRET>
