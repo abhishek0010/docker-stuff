@@ -1,0 +1,3 @@
+[submodule "docker-compose-stacks/jupyter-docker-compose"]
+	path = docker-compose-stacks/jupyter-docker-compose
+	url = git@github.com:abhishek0010/jupyter-docker-compose.git
