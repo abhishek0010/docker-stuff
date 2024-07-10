@@ -1,0 +1,25 @@
+version: '3'
+services:
+  couchserver:
+    image: couchdb:latest
+    restart: always
+    ports:
+      - "5984:5984"
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=avisekkr
+    volumes:
+      - dbdata:/opt/couchdb/data
+    networks:
+      - reverse_proxy_nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.couchdb.rule=Host(`couchdb.abhishek0010.in`)"
+      - "traefik.http.routers.couchdb.tls=true"
+      #- "traefik.http.routers.serge.middlewares=authelia@docker"
+      - "traefik.http.services.couchdb.loadbalancer.server.port=5984"
+networks:
+  reverse_proxy_nw:
+    external: true
+volumes:
+  dbdata:
