@@ -3,7 +3,7 @@ version: "3.7"
 services:
   traefik:
     container_name: traefik
-    image: traefik:latest
+    image: traefik:3.2.3 #2.10.0
     restart: unless-stopped
     ports:
       - "80:80"
